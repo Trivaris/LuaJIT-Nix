@@ -401,24 +401,10 @@ set(MINILUA_EXE minilua)
 if(HOST_WINE)
   set(MINILUA_EXE minilua.exe)
 endif()
-if(NOT CMAKE_CROSSCOMPILING)
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/host/minilua)
-  set(MINILUA_PATH $<TARGET_FILE:minilua>)
-else()
-  make_directory(${CMAKE_CURRENT_BINARY_DIR}/minilua)
-  set(MINILUA_PATH ${CMAKE_CURRENT_BINARY_DIR}/minilua/${LJ_PREFIX}${MINILUA_EXE})
 
-  add_custom_command(OUTPUT ${MINILUA_PATH}
-    COMMAND ${CMAKE_COMMAND} ${TOOLCHAIN} ${TARGET_SYS} -DLUAJIT_DIR=${LUAJIT_DIR}
-            -DCMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
-            ${CMAKE_CURRENT_LIST_DIR}/host/minilua
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/minilua
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/minilua)
-
-  add_custom_target(minilua ALL
-    DEPENDS ${MINILUA_PATH}
-  )
-endif()
+# Millennium change: inherit cmake config from parent
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/host/minilua)
+set(MINILUA_PATH $<TARGET_FILE:minilua>)
 
 # Generate luajit.h
 set(GIT_FORMAT %ct)
@@ -461,30 +447,10 @@ if(HOST_WINE)
   set(BUILDVM_EXE buildvm.exe)
 endif()
 
-if(NOT CMAKE_CROSSCOMPILING)
-  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/host/buildvm)
-  set(BUILDVM_PATH $<TARGET_FILE:buildvm>)
-  add_dependencies(buildvm buildvm_arch_h)
-else()
-  set(BUILDVM_PATH ${CMAKE_CURRENT_BINARY_DIR}/buildvm/${LJ_PREFIX}${BUILDVM_EXE})
-
-  make_directory(${CMAKE_CURRENT_BINARY_DIR}/buildvm)
-
-  add_custom_command(OUTPUT ${BUILDVM_PATH}
-    COMMAND ${CMAKE_COMMAND} ${TOOLCHAIN} ${TARGET_SYS}
-            ${CMAKE_CURRENT_LIST_DIR}/host/buildvm
-            -DCMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P}
-            -DLUAJIT_DIR=${LUAJIT_DIR}
-            -DEXTRA_COMPILER_FLAGS_FILE=${BUILDVM_COMPILER_FLAGS_PATH}
-    COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/buildvm
-    DEPENDS ${CMAKE_CURRENT_LIST_DIR}/host/buildvm/CMakeLists.txt
-    DEPENDS buildvm_arch_h
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/buildvm)
-
-  add_custom_target(buildvm ALL
-    DEPENDS ${BUILDVM_PATH}
-  )
-endif()
+# Millennium change: inherit cmake config from parent
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/host/buildvm)
+set(BUILDVM_PATH $<TARGET_FILE:buildvm>)
+add_dependencies(buildvm buildvm_arch_h)
 
 set(LJVM_MODE elfasm)
 if(APPLE)
