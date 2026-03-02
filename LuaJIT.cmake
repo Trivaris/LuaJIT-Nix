@@ -412,9 +412,16 @@ if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   set(GIT_FORMAT %%ct)
 endif()
 
+if(EXISTS "${LUAJIT_DIR}/.git")
+    set(LUAJIT_REV_CMD git -C ${LUAJIT_DIR} show -s --format=${GIT_FORMAT})
+else()
+    set(LUAJIT_REV_CMD ${CMAKE_COMMAND} -E echo "rolling")
+endif()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/luajit_relver.txt
-  COMMAND git show -s --format=${GIT_FORMAT} > ${CMAKE_CURRENT_BINARY_DIR}/luajit_relver.txt
+  COMMAND ${LUAJIT_REV_CMD} > ${CMAKE_CURRENT_BINARY_DIR}/luajit_relver.txt
   WORKING_DIRECTORY ${LUAJIT_DIR}
+  VERBATIM
 )
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/luajit.h
@@ -637,6 +644,7 @@ set(luajit_headers
   ${LJ_DIR}/lua.h
   ${LJ_DIR}/luaconf.h
   ${LJ_DIR}/lualib.h
+  ${LJ_DIR}/lua.hpp
   ${CMAKE_CURRENT_BINARY_DIR}/luajit.h)
 install(FILES ${luajit_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/luajit)
 install(TARGETS libluajit
